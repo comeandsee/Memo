@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class LevelBehavior : MonoBehaviour
 {
-    List<string> levels = new List<string>() { "8", "12"};
+    List<string> levels = new List<string>() { "6", "12", "18", "24"};
     List<string> category = new List<string>() { "owoce", "warzywa", "kroliczki"};
 
     public Dropdown dropdownLevels;

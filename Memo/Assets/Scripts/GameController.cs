@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine;
 using UnityEngine.SceneManagement;
+using Assets.Scripts;
 public class GameController : MonoBehaviour
 {
     [SerializeField]
@@ -16,8 +16,8 @@ public class GameController : MonoBehaviour
     public List<Sprite> gamePuzzles = new List<Sprite>();
     private bool firstGuess, secondGuess;
 
-    public int countGuesses;
-    private int countCorrectGuesses;
+    public int countGuesses = 0;
+    private int countCorrectGuesses = 0;
     private int gameGuesses;
 
     private string firstGuessPuzzle, secondGuessPuzzle;
@@ -25,16 +25,23 @@ public class GameController : MonoBehaviour
     private int firstGuessIndex, secondGuessIndex;
 
     private float timeToWaitBeforeTurnAround = .2f;
-    private float timeToChechMatchedPuzzle = .6f;
+    private float timeToChechMatchedPuzzle = .5f;
 
     private string pathToEasyCards = "Sprites/cards/";
     private string category;
 
     public GameObject endWindow;
+    public GameObject quiteWindow;
+    public Text movesNumber;
+
+    public string nick;
+    public InputField nickInput;
+    public GameObject nickWindow;
+
     private void Awake()
     {
         category = PlayerPrefs.GetString("category");
-        puzzles = Resources.LoadAll<Sprite>(pathToEasyCards+category);
+        puzzles = Resources.LoadAll<Sprite>(pathToEasyCards + category);
     }
     void Start()
     {
@@ -42,13 +49,13 @@ public class GameController : MonoBehaviour
         AddListeners();
         AddGamePuzzle();
         Shuffle(gamePuzzles);
-        gameGuesses = gamePuzzles.Count / 2;  
+        gameGuesses = gamePuzzles.Count / 2;
     }
 
     void GetButtons()
     {
         GameObject[] objects = GameObject.FindGameObjectsWithTag("PuzzleButton");
-        for( int i = 0; i <objects.Length; i++)
+        for (int i = 0; i < objects.Length; i++)
         {
             btns.Add(objects[i].GetComponent<Button>());
             btns[i].image.sprite = bgImage;
@@ -61,12 +68,12 @@ public class GameController : MonoBehaviour
         int index = 0;
         if (buttonsNumber > puzzles.Length)
         {
-            Debug.LogError($"Liczba puzzli ({buttonsNumber}) wieksza niz liczba podwojonych obrazkow do wczytania({2*puzzles.Length})");
+            Debug.LogError($"Liczba puzzli ({buttonsNumber}) wieksza niz liczba podwojonych obrazkow do wczytania({2 * puzzles.Length})");
         }
 
         for (int i = 0; i < buttonsNumber; i++)
         {
-            if( index == buttonsNumber / 2)
+            if (index == buttonsNumber / 2)
             {
                 index = 0;
             }
@@ -78,22 +85,25 @@ public class GameController : MonoBehaviour
 
     void AddListeners()
     {
-        foreach(Button btn in btns)
-        {   
+        foreach (Button btn in btns)
+        {
             btn.onClick.AddListener(() => PickPuzzle());
         }
     }
 
     public void PickPuzzle()
     {
-        if (!firstGuess) {
+        if (!firstGuess)
+        {
 
             firstGuess = true;
             firstGuessIndex = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
             firstGuessPuzzle = gamePuzzles[firstGuessIndex].name;
             btns[firstGuessIndex].image.sprite = gamePuzzles[firstGuessIndex];
-           
-        } else if (!secondGuess){
+
+        }
+        else if (!secondGuess)
+        {
 
             secondGuess = true;
             secondGuessIndex = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
@@ -108,7 +118,7 @@ public class GameController : MonoBehaviour
     {
         yield return new WaitForSeconds(timeToChechMatchedPuzzle);
 
-        if(firstGuessPuzzle == secondGuessPuzzle && firstGuessIndex!=secondGuessIndex)
+        if (firstGuessPuzzle == secondGuessPuzzle && firstGuessIndex != secondGuessIndex)
         {
             yield return new WaitForSeconds(timeToWaitBeforeTurnAround);
 
@@ -140,8 +150,9 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("Koniec gry");
             Debug.Log($"Zgadłeś w {countGuesses} próbach.");
-            endWindow.SetActive(true);
 
+           endWindow.SetActive(true);
+           movesNumber.text = "Liczba prób : " + countGuesses;
         }
     }
 
@@ -160,6 +171,17 @@ public class GameController : MonoBehaviour
             case (2):
                 SceneManager.LoadScene("Menu");
                 break;
+            case (3): //nick
+                nickWindow.SetActive(true);
+                break;
+            case (4): //save
+                Ranking ranking = new Ranking();
+                nick = nickInput.text;
+                ranking.setRecord(countGuesses, nick);
+                nickWindow.SetActive(false);
+                SceneManager.LoadScene("Menu");
+                break;
+
         }
     }
 
@@ -173,5 +195,28 @@ public class GameController : MonoBehaviour
             list[radomIndex] = tmp;
         }
     }
+
+    public void ExitGameButton()
+    {
+        Debug.Log("Exit Game");
+        quiteWindow.SetActive(true);
+    }
+
+    public void PopUpQuite(int i)
+    {
+        switch (i)
+        {
+            default:
+            case (0):
+                quiteWindow.SetActive(false);
+                break;
+            case (1):
+                Debug.Log("Quit Game");
+                Application.Quit();
+                break;
+        }
+    }
+
+
 
 }

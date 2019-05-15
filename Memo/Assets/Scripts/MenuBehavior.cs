@@ -1,11 +1,16 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MenuBehavior : MonoBehaviour
 {
     public GameObject quiteWindow;
+    public GameObject rankingWindow;
+    public Text records;
     public void quite()
     {
         quiteWindow.SetActive(true);
@@ -23,8 +28,24 @@ public class MenuBehavior : MonoBehaviour
                 Application.Quit();
                 break;
             case (2):
-                SceneManager.LoadScene("Menu");
+                rankingWindow.SetActive(true);
+
+                Ranking ranking = new Ranking();
+                var recordsList = ranking.getRecords();
+                var sortedList = recordsList.OrderBy(p => p.MoveNumber).ToList();
+                int x = 1;
+                string recordsString ="";
+                foreach(var rec in sortedList)
+                {
+                    recordsString += x + ". Użytkownik: " + rec.user + ", liczba ruchów: " + rec.MoveNumber + ",data: " + rec.Date + "\n";
+                    x++;
+                }
+                records.text = recordsString;
                 break;
+            case (3):
+                rankingWindow.SetActive(false);
+                break;
+
         }
     }
     
