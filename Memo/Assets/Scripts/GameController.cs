@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Assets.Scripts;
+using static System.Math;
+
 public class GameController : MonoBehaviour
 {
     [SerializeField]
@@ -38,11 +40,28 @@ public class GameController : MonoBehaviour
     public InputField nickInput;
     public GameObject nickWindow;
 
+    private PlayerEmotions playerEmotions;
+    private Text emotionField;
+
+    public Color disabledCardColor = new Color(0, 0, 0, 0);
+
+    public bool isPreviewAvailable = false;
+    GameObject previewCardsButton;
+
+    Text middleText;
+
     private void Awake()
     {
         category = PlayerPrefs.GetString("category");
         puzzles = Resources.LoadAll<Sprite>(pathToEasyCards + category);
+
+        Transform player = GameObject.FindGameObjectWithTag("Player").transform;
+        playerEmotions = player.GetComponent<PlayerEmotions>();
+
+        Transform emotion = GameObject.FindGameObjectWithTag("CurrentEmotion").transform;
+        emotionField = emotion.GetComponent<Text>();
     }
+
     void Start()
     {
         GetButtons();
@@ -50,8 +69,26 @@ public class GameController : MonoBehaviour
         AddGamePuzzle();
         Shuffle(gamePuzzles);
         gameGuesses = gamePuzzles.Count / 2;
+
+        Transform textInfo = GameObject.FindGameObjectWithTag("MiddleText").transform;
+        middleText = textInfo.GetComponent<Text>();
+        middleText.enabled = false;
+
+        previewCardsButton = GameObject.FindGameObjectWithTag("PreviewCardsButton");
+        setPreviewCardsButtonVisibility(true);
     }
 
+    private void Update()
+    {
+        if (playerEmotions.currentSmile > 20)
+        {
+            emotionField.text = "Smile";
+        }
+        else
+        {
+            emotionField.text = "Neutral";
+        }
+    }
     void GetButtons()
     {
         GameObject[] objects = GameObject.FindGameObjectsWithTag("PuzzleButton");
@@ -104,13 +141,16 @@ public class GameController : MonoBehaviour
         }
         else if (!secondGuess)
         {
-
-            secondGuess = true;
-            secondGuessIndex = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
-            secondGuessPuzzle = gamePuzzles[secondGuessIndex].name;
-            btns[secondGuessIndex].image.sprite = gamePuzzles[secondGuessIndex];
-            countGuesses++;
-            StartCoroutine(CheckIfThePuzzlesMatch());
+            int secondGuessIndexTmp = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+            if (firstGuessIndex != secondGuessIndexTmp)
+            {
+                secondGuess = true;
+                secondGuessIndex = secondGuessIndexTmp;
+                secondGuessPuzzle = gamePuzzles[secondGuessIndex].name;
+                btns[secondGuessIndex].image.sprite = gamePuzzles[secondGuessIndex];
+                countGuesses++;
+                StartCoroutine(CheckIfThePuzzlesMatch());
+            }
         }
     }
 
@@ -118,15 +158,15 @@ public class GameController : MonoBehaviour
     {
         yield return new WaitForSeconds(timeToChechMatchedPuzzle);
 
-        if (firstGuessPuzzle == secondGuessPuzzle && firstGuessIndex != secondGuessIndex)
+        if (firstGuessPuzzle == secondGuessPuzzle)
         {
             yield return new WaitForSeconds(timeToWaitBeforeTurnAround);
 
             btns[firstGuessIndex].interactable = false;
             btns[secondGuessIndex].interactable = false;
 
-            btns[firstGuessIndex].image.color = new Color(0, 0, 0, 0);
-            btns[secondGuessIndex].image.color = new Color(0, 0, 0, 0);
+            btns[firstGuessIndex].image.color = disabledCardColor;
+            btns[secondGuessIndex].image.color = disabledCardColor;
 
             CheckIfTheGameIsFinished();
         }
@@ -185,7 +225,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void Shuffle(List<Sprite> list)
+    public void Shuffle(List<Sprite> list)
     {
         for (int i = 0; i < list.Count; i++)
         {
@@ -194,6 +234,76 @@ public class GameController : MonoBehaviour
             list[i] = list[radomIndex];
             list[radomIndex] = tmp;
         }
+    }
+
+    public void ShuffleRemainingCards()
+    {
+        StartCoroutine(ShowBigMessage("Tasowanie kart", 2));
+        int randomIndex;
+        for (int j = 0; j < 10; j++)
+        {
+            for (int i = 0; i < gamePuzzles.Count; i++)
+            {
+                randomIndex = Random.Range(i, gamePuzzles.Count);
+                if (btns[i].image.color != disabledCardColor &&
+                    btns[randomIndex].image.color != disabledCardColor)
+                {
+                    Sprite tmp = gamePuzzles[i];
+                    gamePuzzles[i] = gamePuzzles[randomIndex];
+                    gamePuzzles[randomIndex] = tmp;
+                }
+            }
+        }
+    }
+
+    public IEnumerator PreviewCards()
+    {
+        setPreviewCardsButtonVisibility(false);
+
+        List<int> cardsToPreview = new List<int>();
+
+        List<int> remainingCards = new List<int>();
+        for (int i = 0; i < gamePuzzles.Count; i++)
+        {
+            if(btns[i].image.color != disabledCardColor)
+            {
+                remainingCards.Add(i);
+            }
+        }
+        
+        int showCards = Max(1, (int)(remainingCards.Count*0.2));
+        while (showCards > 0)
+        {
+            int randomIndexRemainingCard = Random.Range(0, remainingCards.Count - 1);
+            int randomIndexCardObject = remainingCards[randomIndexRemainingCard];
+            cardsToPreview.Add(randomIndexCardObject);
+            remainingCards.Remove(randomIndexRemainingCard);
+
+            showCards--;
+        }
+
+        foreach(int index in cardsToPreview)
+        {
+            btns[index].image.sprite = gamePuzzles[index];
+        }
+
+        yield return new WaitForSeconds(2);
+
+        foreach (int index in cardsToPreview)
+        {
+            btns[index].image.sprite = bgImage;
+        }
+    }
+
+    public void PreviewCardsButton()
+    {
+        StartCoroutine(PreviewCards());
+    }
+
+    void setPreviewCardsButtonVisibility(bool state)
+    {
+        isPreviewAvailable = state;
+        previewCardsButton.SetActive(isPreviewAvailable);
     }
 
     public void ExitGameButton()
@@ -217,6 +327,12 @@ public class GameController : MonoBehaviour
         }
     }
 
-
+    IEnumerator ShowBigMessage(string message, float delay)
+    {
+        middleText.text = message;
+        middleText.enabled = true;
+        yield return new WaitForSeconds(delay);
+        middleText.enabled = false;
+    }
 
 }

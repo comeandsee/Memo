@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - PuzzleButton
+  - CurrentEmotion
+  - PreviewCardsButton
+  - MiddleText
   layers:
   - Default
   - TransparentFX
