@@ -7,6 +7,7 @@ using Affdex;
 
 public class PlayerEmotions : ImageResultsListener
 {
+    public bool faceOn;
     public float currentSmile;
     public float currentInterocularDistance;
     public float currentContempt;
@@ -18,11 +19,13 @@ public class PlayerEmotions : ImageResultsListener
     public override void onFaceFound(float timestamp, int faceId)
     {
         Debug.Log("Found the face");
+        faceOn = true;
     }
 
     public override void onFaceLost(float timestamp, int faceId)
     {
         Debug.Log("Lost the face");
+        faceOn = false;
     }
 
     public override void onImageResults(Dictionary<int, Face> faces)

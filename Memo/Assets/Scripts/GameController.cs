@@ -47,6 +47,11 @@ public class GameController : MonoBehaviour
     private const double reactionThreshold = 20.0;
     private const double minEmotionDuration = 10.0;
 
+    private double time = 0.0;
+    private Text timeField;
+
+    private Text faceField;
+
     public Color disabledCardColor = new Color(0, 0, 0, 0);
 
     public bool isPreviewAvailable = false;
@@ -64,8 +69,13 @@ public class GameController : MonoBehaviour
 
         Transform emotion = GameObject.FindGameObjectWithTag("CurrentEmotion").transform;
         emotionField = emotion.GetComponent<Text>();
-
         emotionAccumulator = new EmotionAccumulator();
+
+        Transform timer = GameObject.FindGameObjectWithTag("Timer").transform;
+        timeField = timer.GetComponent<Text>();
+
+        Transform faceDetectionField = GameObject.FindGameObjectWithTag("FaceDetectionField").transform;
+        faceField = faceDetectionField.GetComponent<Text>();
     }
 
     void Start()
@@ -86,12 +96,24 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
+        if (playerEmotions.faceOn)
+        {
+            faceField.color = Color.green;
+            faceField.text = "Face: ON";
+        }
+        else
+        {
+            faceField.color = Color.red;
+            faceField.text = "Face: OFF";
+        }
+           
         double deltaTime = Time.deltaTime;
         if (playerEmotions.currentSmile > reactionThreshold)
         {
             emotionAccumulator.update("positive", deltaTime);
             double positiveDuration = emotionAccumulator.getEmotionDuration("positive");
-            emotionField.text = positiveDuration.ToString();
+            emotionField.color = Color.green;
+            emotionField.text = "Nastrój pozytywny";
             if (positiveDuration > minEmotionDuration)
             {
                 StartCoroutine(PreviewCards());
@@ -102,7 +124,8 @@ public class GameController : MonoBehaviour
         {
             emotionAccumulator.update("negative", deltaTime);
             double negativeDuration = emotionAccumulator.getEmotionDuration("negative");
-            emotionField.text = negativeDuration.ToString();
+            emotionField.color = Color.red;
+            emotionField.text = "Nastrój negatywny";
             if (negativeDuration > minEmotionDuration)
             {
                 ShuffleRemainingCards();
@@ -111,9 +134,14 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            emotionField.text = "Neutral";
+            emotionField.color = Color.grey;
+            emotionField.text = "Nastrój neutralny";
             emotionAccumulator.update("neutral", deltaTime);
         }
+        time = (time + deltaTime) % double.MaxValue;
+        string minute = ((int)(time) / 60).ToString();
+        string second = ((int)(time) % 60).ToString().PadLeft(2, '0');
+        timeField.text = "Time: " + minute + ":" + second;
     }
     void GetButtons()
     {
