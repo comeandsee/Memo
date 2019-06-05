@@ -42,6 +42,10 @@ public class GameController : MonoBehaviour
 
     private PlayerEmotions playerEmotions;
     private Text emotionField;
+    EmotionAccumulator emotionAccumulator;
+
+    private const double reactionThreshold = 20.0;
+    private const double minEmotionDuration = 10.0;
 
     public Color disabledCardColor = new Color(0, 0, 0, 0);
 
@@ -60,6 +64,8 @@ public class GameController : MonoBehaviour
 
         Transform emotion = GameObject.FindGameObjectWithTag("CurrentEmotion").transform;
         emotionField = emotion.GetComponent<Text>();
+
+        emotionAccumulator = new EmotionAccumulator();
     }
 
     void Start()
@@ -80,13 +86,33 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
-        if (playerEmotions.currentSmile > 20)
+        double deltaTime = Time.deltaTime;
+        if (playerEmotions.currentSmile > reactionThreshold)
         {
-            emotionField.text = "Smile";
+            emotionAccumulator.update("positive", deltaTime);
+            double positiveDuration = emotionAccumulator.getEmotionDuration("positive");
+            emotionField.text = positiveDuration.ToString();
+            if (positiveDuration > minEmotionDuration)
+            {
+                StartCoroutine(PreviewCards());
+                emotionAccumulator.reset("positive");
+            }
+        }
+        else if (playerEmotions.currentAnger > reactionThreshold || playerEmotions.currentContempt > reactionThreshold)
+        {
+            emotionAccumulator.update("negative", deltaTime);
+            double negativeDuration = emotionAccumulator.getEmotionDuration("negative");
+            emotionField.text = negativeDuration.ToString();
+            if (negativeDuration > minEmotionDuration)
+            {
+                ShuffleRemainingCards();
+                emotionAccumulator.reset("negative");
+            }
         }
         else
         {
             emotionField.text = "Neutral";
+            emotionAccumulator.update("neutral", deltaTime);
         }
     }
     void GetButtons()
