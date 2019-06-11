@@ -373,7 +373,8 @@ public class GameController : MonoBehaviour
                 break;
             case (1):
                 Debug.Log("Quit Game");
-                Application.Quit();
+                SceneManager.LoadScene("Menu");
+                //Application.Quit();
                 break;
         }
     }

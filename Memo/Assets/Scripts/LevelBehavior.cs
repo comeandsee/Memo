@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,7 +10,7 @@ using UnityEngine.UI;
 public class LevelBehavior : MonoBehaviour
 {
     List<string> levels = new List<string>() { "6", "12", "18", "24"};
-    List<string> category = new List<string>() { "owoce", "warzywa", "kroliczki"};
+    List<string> category = new List<string>();// { "owoce", "warzywa", "kroliczki"};
 
     public Dropdown dropdownLevels;
     public Dropdown dropdownCategories;
@@ -44,7 +45,17 @@ public class LevelBehavior : MonoBehaviour
 
     void PopulateList()
     {
+        LoadCategories();
         dropdownLevels.AddOptions(levels);
         dropdownCategories.AddOptions(category);
+    }
+
+    void LoadCategories()
+    {
+        string[] filePaths = Directory.GetDirectories("Assets/Resources/Sprites/cards/");
+        foreach(string fp in filePaths)
+        {
+            category.Add(Path.GetFileName(fp));
+        }
     }
 }
