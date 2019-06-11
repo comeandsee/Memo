@@ -30,7 +30,7 @@ public class LevelBehavior : MonoBehaviour
     {
         int levels = System.Convert.ToInt32(selectedLevel.text);
         PlayerPrefs.SetInt("level", levels);
-
+        
         string category = selectedCategory.text;
         PlayerPrefs.SetString("category", category);
 

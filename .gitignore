@@ -10,6 +10,8 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 /Game/
+/Base/
+/Plugins/
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
 

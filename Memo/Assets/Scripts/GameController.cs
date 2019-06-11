@@ -31,14 +31,12 @@ public class GameController : MonoBehaviour
 
     private string pathToEasyCards = "Sprites/cards/";
     private string category;
+    private int level;
 
     public GameObject endWindow;
     public GameObject quiteWindow;
     public Text movesNumber;
 
-    public string nick;
-    public InputField nickInput;
-    public GameObject nickWindow;
 
     private PlayerEmotions playerEmotions;
     private Text emotionField;
@@ -58,10 +56,12 @@ public class GameController : MonoBehaviour
     GameObject previewCardsButton;
 
     Text middleText;
+    private double gameTime = 1.4;
 
     private void Awake()
     {
         category = PlayerPrefs.GetString("category");
+        level = PlayerPrefs.GetInt("level");
         puzzles = Resources.LoadAll<Sprite>(pathToEasyCards + category);
 
         Transform player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -264,15 +264,12 @@ public class GameController : MonoBehaviour
                 break;
             case (2):
                 SceneManager.LoadScene("Menu");
-                break;
-            case (3): //nick
-                nickWindow.SetActive(true);
+                MenuBehavior.nickWindowVisible = false;
                 break;
             case (4): //save
-                Ranking ranking = new Ranking();
-                nick = nickInput.text;
-                ranking.setRecord(countGuesses, nick);
-                nickWindow.SetActive(false);
+                MenuBehavior.database.InsertGame(countGuesses, gameTime, category, level, System.DateTime.Today.ToShortDateString(), MenuBehavior.playerName);
+                Debug.Log("Game saved.");
+                MenuBehavior.nickWindowVisible = false;
                 SceneManager.LoadScene("Menu");
                 break;
 
