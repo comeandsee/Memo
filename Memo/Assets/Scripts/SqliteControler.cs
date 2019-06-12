@@ -92,15 +92,17 @@ public class SqliteControler
         string recordsString = "";
         recordsString += MenuBehavior.playerName + "\n";
         recordsString += " ------------------------- \n";
+        int index = 1;
         while (readerGame.Read())
         {
-            recordsString += readerGame[0].ToString() + ". " +
+            recordsString += index + ". " +
                              readerGame[5].ToString() + " " +
                              readerGame[2].ToString() + " s, " +
                              "kategoria: " + readerGame[3].ToString() + ", "+
-                             "level: " + readerGame[4].ToString() + ".\n ";
+                             "level: " + readerGame[4].ToString() + ".\n";
 
             Debug.Log(recordsString);
+            index++;
         }
 
         return recordsString;
