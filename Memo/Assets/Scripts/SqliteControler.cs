@@ -95,11 +95,15 @@ public class SqliteControler
         int index = 1;
         while (readerGame.Read())
         {
+            double time = Double.Parse(readerGame[2].ToString());
+            string minute = ((int)(time) / 60).ToString();
+            string second = ((int)(time) % 60).ToString().PadLeft(2, '0');
+
             recordsString += index + ". " +
-                             readerGame[5].ToString() + " " +
-                             readerGame[2].ToString() + " s, " +
-                             "kategoria: " + readerGame[3].ToString() + ", "+
-                             "level: " + readerGame[4].ToString() + ".\n";
+                             readerGame[5].ToString() + " || " +
+                             "czas: " + minute + ":" + second + " || " +
+                             "kategoria: " + readerGame[3].ToString() + " || " +
+                             "ilość kart: " + readerGame[4].ToString() + ".\n";
 
             Debug.Log(recordsString);
             index++;
@@ -114,9 +118,13 @@ public class SqliteControler
         recordsString += " ------------------------- \n";
         while (readerGame.Read())
         {
+            double time = Double.Parse(readerGame[2].ToString());
+            string minute = ((int)(time) / 60).ToString();
+            string second = ((int)(time) % 60).ToString().PadLeft(2, '0');
+
             recordsString += readerGame[0].ToString() + ". " +
                              readerGame[5].ToString() + " " +
-                             readerGame[2].ToString() + " s, " +
+                             "czas: " + minute + ":" + second +
                              "level: " + readerGame[4].ToString() + ".\n ";
 
             Debug.Log(recordsString);
