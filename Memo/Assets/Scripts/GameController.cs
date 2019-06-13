@@ -56,7 +56,6 @@ public class GameController : MonoBehaviour
     GameObject previewCardsButton;
 
     Text middleText;
-    private double gameTime = 1.4;
 
     private void Awake()
     {
@@ -105,6 +104,9 @@ public class GameController : MonoBehaviour
         {
             faceField.color = Color.red;
             faceField.text = "Face: OFF";
+            playerEmotions.currentSmile = 0;
+            playerEmotions.currentAnger = 0;
+            playerEmotions.currentContempt = 0;
         }
            
         double deltaTime = Time.deltaTime;
@@ -267,7 +269,7 @@ public class GameController : MonoBehaviour
                 MenuBehavior.nickWindowVisible = false;
                 break;
             case (4): //save
-                MenuBehavior.database.InsertGame(countGuesses, gameTime, category, level, System.DateTime.Today.ToShortDateString(), MenuBehavior.playerName);
+                MenuBehavior.database.InsertGame(countGuesses, time, category, level, System.DateTime.Today.ToShortDateString(), MenuBehavior.playerName);
                 Debug.Log("Game saved.");
                 MenuBehavior.nickWindowVisible = false;
                 SceneManager.LoadScene("Menu");
